@@ -2,6 +2,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const mazeContainer = document.getElementById('maze');
   const ball = document.getElementById('ball');
   let ballPosition = { x: 2.2, y: 2.1 };
+  let canMove = true;  // 공이 움직일 수 있는지 여부를 결정하는 플래그
   const quizImages = {
       1: {image:'question1.jpg', answer: 'no'},
       2: {image: 'question2.jpg', answer: 'no'},
@@ -27,9 +28,9 @@ document.addEventListener("DOMContentLoaded", () => {
       22: {image: 'question22.jpg', answer: 'yes'},
       23: {image: 'question23.jpg', answer: 'yes'},
       24: {image: 'question24.jpg', answer: 'no'}
-  
-    };
-      // 공을 초기 위치로 설정
+  };
+
+  // 공을 초기 위치로 설정
   function setBallPosition(x, y) {
     ball.style.left = `${x * 8}px`;
     ball.style.top = `${y * 8}px`;
@@ -39,6 +40,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // 키보드 이벤트로 공 움직이기
   document.addEventListener('keydown', (event) => {
+    if (!canMove) return; // canMove가 false일 때 공을 움직이지 않음
+
     const key = event.key;
     let newX = ballPosition.x;
     let newY = ballPosition.y;
@@ -57,6 +60,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // 트랩에 도달했는지 확인
     if (typeof nextCell === 'object' && nextCell.hasOwnProperty('trap')) {
+        canMove = false;  // 트랩에 도달하면 공의 이동을 막음
         showQuiz(nextCell.trap);
     }
 
@@ -75,7 +79,7 @@ document.addEventListener("DOMContentLoaded", () => {
     if (typeof nextCell === 'object' && nextCell.hasOwnProperty('bye')) {
         alert('축하합니다! 미로를 탈출했습니다!');
     }
-});
+  });
 
   // 퀴즈를 보여주는 함수
   function showQuiz(trapId) {
@@ -87,13 +91,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     quizContainer.dataset.correctAnswer = quizImages[trapId].answer;
   }
+
   const initialPosition = { x: 2.2, y: 2.1 };  // 공의 초기 위치
-
-  function setBallPosition(x, y) {
-  ball.style.left = `${x * 8}px`;
-  ball.style.top = `${y * 8}px`;
-}
-
 
   // 퀴즈 버튼 이벤트 핸들러
   document.getElementById('yes-button').addEventListener('click', () => {
@@ -112,29 +111,30 @@ document.addEventListener("DOMContentLoaded", () => {
     } else {
         alert('틀렸습니다! 다시 시도하세요.');
     }
-})
+  });
 
-document.getElementById('no-button').addEventListener('click', () => {
-  const quizContainer = document.getElementById('quiz-container');
-  const correctAnswer = quizContainer.dataset.correctAnswer;
+  document.getElementById('no-button').addEventListener('click', () => {
+    const quizContainer = document.getElementById('quiz-container');
+    const correctAnswer = quizContainer.dataset.correctAnswer;
 
-  if (correctAnswer === 'no') {
-      alert('정답입니다! 공이 시작지점으로 다시 되돌아 갑니다.');
+    if (correctAnswer === 'no') {
+        alert('정답입니다! 공이 시작지점으로 다시 되돌아 갑니다.');
 
-      ballPosition.x = initialPosition.x;
-      ballPosition.y = initialPosition.y;
-      setBallPosition(ballPosition.x, ballPosition.y);
+        ballPosition.x = initialPosition.x;
+        ballPosition.y = initialPosition.y;
+        setBallPosition(ballPosition.x, ballPosition.y);
 
-      // 다음 스테이지 로직 추가
-      hideQuiz();
-  } else {
-      alert('틀렸습니다! 다시 시도하세요.');
-  }
-});
+        // 다음 스테이지 로직 추가
+        hideQuiz();
+    } else {
+        alert('틀렸습니다! 다시 시도하세요.');
+    }
+  });
 
   // 퀴즈를 숨기는 함수
   function hideQuiz() {
     const quizContainer = document.getElementById('quiz-container');
     quizContainer.style.display = 'none';
+    canMove = true;  // 퀴즈가 끝나면 공의 이동을 다시 허용함
   }
 });
